@@ -1,7 +1,7 @@
 name: build and test
 
 env:
-    REQUIREMENTS_PATH: 'backend/requirements.txt'
+    REQUIREMENTS_PATH: './backend/requirements.txt'
 
 on:
     push:
