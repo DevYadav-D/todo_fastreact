@@ -22,6 +22,20 @@ jobs:
             - name: Codecov
               uses: codecov/codecov-action@v5.0.2
 
+             # Step 2: Debug directory structure
+            - name: Debug file structure
+              run: |
+                echo "Listing all files in the repository:"
+                ls -R
+
+            # Step 3: Verify requirements file exists
+            - name: Verify requirements file exists
+              run: |
+                if [ ! -f "$REQUIREMENTS_PATH" ]; then
+                echo "Error: $REQUIREMENTS_PATH not found!"
+                exit 1
+                fi
+
             - name: Set up python
               uses: actions/setup-python@v2
               with:
