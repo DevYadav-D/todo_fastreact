@@ -24,6 +24,16 @@ def create_todo(db:Session, description:str, todo_date: date):
 def get_all_todos(db:Session):
     return db.query(Todo).all()
 
+def get_todo(db: Session, todo_id:int):
+    try:
+        todo = db.query(Todo).filter(Todo.id==todo_id).first()
+        if not todo:
+            raise HTTPException(status_code=404, detail="Todo not found")
+        return todo
+    except SQLAlchemyError as e:
+        logging.error(f'Error fetching todo: {e}')
+        raise HTTPException(status_code=500, detail="Internal server error")
+    
 def update_todo(db:Session, todo_id:int, **kwargs):
     todo =  db.query(Todo).filter(Todo.id==todo_id).first()
     if todo:
@@ -35,9 +45,14 @@ def update_todo(db:Session, todo_id:int, **kwargs):
     return None
 
 def delete_todo(db:Session, todo_id:int):
-    todo = db.query(Todo).filter(Todo.id==todo_id).first()
-    if todo:
+    try:
+        todo = db.query(Todo).filter(Todo.id==todo_id).first()
+        if not todo:
+            raise HTTPException(status_code=404, detail="Todo not found")
         db.delete(todo)
         db.commit()
-        return True
-    return False
+        return {"detail":"To do deleted"}
+    except SQLAlchemyError as e:
+        db.rollback()
+        logging.error(f'Error deleting todo: {e}')
+        raise HTTPException(status_code=500, detail="Internal server error")
