@@ -1,48 +1,26 @@
 from fastapi import FastAPI
-from models import Todo
+import uvicorn
+import logging
+
+#todo start
+from routers.todo.router import router as todo_router
+from core.todo.database import init_db as todo_db_init
+#todo end
+
+# Configure logging 
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI()
 
 @app.get("/")
-async def root():
-    return {"message":"hello"}
+def get():
+    return {"hello":"here is it"}
 
-todos = []
+#todo start
+app.include_router(todo_router, prefix="/todos", tags=["todos"])
+todo_db_init()
+#todo end
 
-#get all todos
-@app.get("/todos")
-async def get_todos():
-    return {"todos":todos}
 
-#get single todos
-@app.get("/todos/{todo_id}")
-async def get_todo(todo_id: int):
-    for todo in todos:
-        if todo.id == todo_id:
-            return {"todo": todo}
-    return {"No todos item found"}
-
-#create a todo
-@app.post("/todos")
-async def create_todos(todo: Todo):
-    todos.append(todo)
-    return {"todos": "Todo has been added"}
-
-#update a todo
-@app.put("/todos/{todo_id}")
-async def update_todo(todo_id: int, todo_obj:Todo):
-    for todo in todos:
-        if todo.id == todo_id:
-            todo.id = todo_id 
-            todo.item = todo_obj.item
-            return {"todo":todo}
-    return {"message": "not found todos"}
-
-#delete a todo
-@app.delete("/todos/{todo_id}")
-async def delete_todo(todo_id: int):
-    for todo in todos:
-        if todo.id == todo_id:
-            todos.remove(todo)
-            return {"successfully removed"}
-    return {"message": "No todo available"}
+if __name__=="__main__":
+    uvicorn.run("main:app", reload=True)
